@@ -1,0 +1,14 @@
+# GitProtect
+
+GitProtect is a security tool designed to scan public GitHub repositories for leaked secrets, API keys, passwords, and other credentials. It monitors repositories and alerts developers when sensitive information is accidentally committed.
+
+## Features
+- **Deep Git History Scan**: Scans every commit in repository history.
+- **Real-Time Alerts**: Sends instant email alerts upon secret detection.
+- **Zero Config Setup**: Works simply by entering a GitHub username.
+- **100+ Secret Patterns**: Detects AWS keys, Stripe tokens, GitHub PATs, Slack webhooks, and more.
+- **Entropy Analysis**: Identifies high-entropy strings that may be unknown secrets.
+
+## Pricing
+- **Free Tier**: Free for individual developers and open source maintainers. Includes unlimited public repository scans, full commit history analysis, and email alerts.
+- **Pro Tier (Coming Soon)**: For teams that need private repository monitoring, GitHub OAuth secure access, Slack/webhook notifications, and CI/CD pipeline integration.

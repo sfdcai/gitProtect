@@ -15,30 +15,32 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen" style={{ background: '#0a0b14' }}>
+    <main className="min-h-screen" style={{ background: '#0a0b14' }}>
       {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(10,11,20,0.85)', backdropFilter: 'blur(20px)', borderColor: '#1e2235' }}>
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4f63ff, #6366f1)' }}>
-              <Shield size={16} className="text-white" />
+      <header>
+        <nav aria-label="Main Navigation" className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(10,11,20,0.85)', backdropFilter: 'blur(20px)', borderColor: '#1e2235' }}>
+          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4f63ff, #6366f1)' }}>
+                <Shield size={16} className="text-white" />
+              </div>
+              <span className="font-bold text-lg text-white">GitProtect</span>
             </div>
-            <span className="font-bold text-lg text-white">GitProtect</span>
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" aria-label="Go to Features section" className="text-sm hover:text-white transition-colors" style={{ color: '#8892b0' }}>Features</a>
+              <a href="#pricing" aria-label="Go to Pricing section" className="text-sm hover:text-white transition-colors" style={{ color: '#8892b0' }}>Pricing</a>
+              <a href="https://github.com" aria-label="Visit our GitHub" className="text-sm hover:text-white transition-colors flex items-center gap-1" style={{ color: '#8892b0' }}><Github size={14} /> GitHub</a>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link href="/login" aria-label="Sign In" className="text-sm font-medium px-4 py-2 rounded-lg transition-colors hover:text-white" style={{ color: '#8892b0' }}>Sign In</Link>
+              <Link href="/signup" aria-label="Get Started Free" className="btn-primary text-sm">Get Started Free</Link>
+            </div>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm hover:text-white transition-colors" style={{ color: '#8892b0' }}>Features</a>
-            <a href="#pricing" className="text-sm hover:text-white transition-colors" style={{ color: '#8892b0' }}>Pricing</a>
-            <a href="https://github.com" className="text-sm hover:text-white transition-colors flex items-center gap-1" style={{ color: '#8892b0' }}><Github size={14} /> GitHub</a>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium px-4 py-2 rounded-lg transition-colors hover:text-white" style={{ color: '#8892b0' }}>Sign In</Link>
-            <Link href="/signup" className="btn-primary text-sm">Get Started Free</Link>
-          </div>
-        </div>
-      </nav>
+        </nav>
+      </header>
 
       {/* HERO */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden" aria-labelledby="hero-heading">
         {/* Background glow orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full opacity-20" style={{ background: 'radial-gradient(ellipse, #4f63ff, transparent 70%)', filter: 'blur(60px)' }} />
@@ -51,7 +53,7 @@ export default function LandingPage() {
             Now scanning public repos — it&apos;s free
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight tracking-tight text-white">
+          <h1 id="hero-heading" className="text-5xl md:text-7xl font-black mb-6 leading-tight tracking-tight text-white">
             Protect Your Code.<br />
             <span className="gradient-text">Detect Leaked Secrets.</span>
           </h1>
@@ -62,10 +64,10 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/signup" className="btn-primary text-base px-8 py-3 flex items-center gap-2 rounded-xl">
+            <Link href="/signup" aria-label="Start Scanning Free" className="btn-primary text-base px-8 py-3 flex items-center gap-2 rounded-xl">
               Start Scanning Free <ArrowRight size={16} />
             </Link>
-            <Link href="/login" className="btn-secondary text-base px-8 py-3 rounded-xl flex items-center gap-2">
+            <Link href="/login" aria-label="Sign in with GitHub" className="btn-secondary text-base px-8 py-3 rounded-xl flex items-center gap-2">
               <Github size={16} /> Sign in with GitHub
             </Link>
           </div>
@@ -94,7 +96,7 @@ export default function LandingPage() {
       </section>
 
       {/* STATS */}
-      <section className="py-12 border-y" style={{ borderColor: '#1e2235', background: 'rgba(16,18,31,0.5)' }}>
+      <section className="py-12 border-y" style={{ borderColor: '#1e2235', background: 'rgba(16,18,31,0.5)' }} aria-label="Statistics">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {[
@@ -112,10 +114,10 @@ export default function LandingPage() {
       </section>
 
       {/* FEATURES */}
-      <section id="features" className="py-24 px-6">
+      <section id="features" className="py-24 px-6" aria-labelledby="features-heading">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Everything you need to stay secure</h2>
+            <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-white mb-4">Everything you need to stay secure</h2>
             <p className="text-lg" style={{ color: '#8892b0' }}>Enterprise-grade scanning, available to every developer for free.</p>
           </div>
 
@@ -174,10 +176,10 @@ export default function LandingPage() {
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="py-24 px-6">
+      <section id="pricing" className="py-24 px-6" aria-labelledby="pricing-heading">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, transparent pricing</h2>
+            <h2 id="pricing-heading" className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, transparent pricing</h2>
             <p style={{ color: '#8892b0' }}>Start for free, upgrade when you need more.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -202,7 +204,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className="btn-primary w-full text-center block py-3 rounded-xl">Get Started Free</Link>
+              <Link href="/signup" aria-label="Get Started Free with Free Plan" className="btn-primary w-full text-center block py-3 rounded-xl">Get Started Free</Link>
             </div>
 
             {/* Pro */}
@@ -230,7 +232,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <button disabled className="w-full py-3 rounded-xl font-semibold text-sm opacity-50 cursor-not-allowed" style={{ background: 'rgba(79,99,255,0.3)', color: '#818cf8' }}>Coming Soon</button>
+              <button disabled aria-label="Pro plan coming soon" className="w-full py-3 rounded-xl font-semibold text-sm opacity-50 cursor-not-allowed" style={{ background: 'rgba(79,99,255,0.3)', color: '#818cf8' }}>Coming Soon</button>
             </div>
           </div>
         </div>
@@ -247,12 +249,12 @@ export default function LandingPage() {
           </div>
           <p className="text-sm" style={{ color: '#4a5280' }}>© {new Date().getFullYear()} GitProtect. Built for developers, by developers.</p>
           <div className="flex gap-6">
-            <a href="#" className="text-sm hover:text-white transition-colors" style={{ color: '#4a5280' }}>Privacy</a>
-            <a href="#" className="text-sm hover:text-white transition-colors" style={{ color: '#4a5280' }}>Terms</a>
-            <a href="#" className="text-sm hover:text-white transition-colors" style={{ color: '#4a5280' }}>GitHub</a>
+            <a href="#" aria-label="Privacy Policy" className="text-sm hover:text-white transition-colors" style={{ color: '#4a5280' }}>Privacy</a>
+            <a href="#" aria-label="Terms of Service" className="text-sm hover:text-white transition-colors" style={{ color: '#4a5280' }}>Terms</a>
+            <a href="#" aria-label="Visit GitHub Page" className="text-sm hover:text-white transition-colors" style={{ color: '#4a5280' }}>GitHub</a>
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
