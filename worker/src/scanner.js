@@ -1,5 +1,6 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
 import { join, extname, normalize } from 'path';
+import { execSync } from 'child_process';
 import { SECRET_RULES, EXCLUDED_PATHS, EXCLUDED_EXTENSIONS } from './rules.js';
 
 /**
@@ -136,4 +137,67 @@ export function parseGitBlameInfo(git, repoPath) {
   // This is a simplified approach: get the last commit hash + author for the whole repo
   // For per-file blame, extend this using `git log -- <file>`
   return null;
+}
+
+/**
+ * Scan entire git history for secrets in added lines.
+ * Returns an array of finding objects.
+ */
+export function scanGitHistory(repoRoot) {
+  const allFindings = [];
+  let logOutput = '';
+  try {
+    // Run git log with patches to get all history diffs
+    logOutput = execSync('git log -p --all', { cwd: repoRoot, maxBuffer: 1024 * 1024 * 500 }).toString('utf8');
+  } catch (err) {
+    console.error('Failed to run git log:', err.message);
+    return [];
+  }
+
+  const lines = logOutput.split('\n');
+  let currentCommitHash = null;
+  let currentAuthor = null;
+  let currentFile = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.startsWith('commit ')) {
+      currentCommitHash = line.substring(7).trim();
+      currentFile = null; // reset on new commit
+    } else if (line.startsWith('Author: ')) {
+      currentAuthor = line.substring(8).trim();
+    } else if (line.startsWith('+++ b/')) {
+      currentFile = line.substring(6).trim();
+    } else if (line.startsWith('+') && !line.startsWith('+++')) {
+      if (!currentFile) continue;
+
+      const contentLine = line.substring(1); // remove '+'
+
+      // Skip extremely long lines
+      if (contentLine.length > 2000) continue;
+      if (shouldSkipPath(currentFile)) continue;
+      if (shouldSkipExtension(currentFile)) continue;
+
+      for (const rule of SECRET_RULES) {
+        const match = rule.pattern.exec(contentLine);
+        if (match) {
+          const matched = match[1] ?? match[0];
+          allFindings.push({
+            file_path: currentFile,
+            line_number: 0, // line number is unknown from plain unified diff easily
+            secret_type: rule.name,
+            masked_secret: maskSecret(matched),
+            severity: rule.severity,
+            raw_match: matched, // stripped before DB insert
+            commit_hash: currentCommitHash,
+            commit_author: currentAuthor,
+          });
+          break; // One match per line per pass
+        }
+      }
+    }
+  }
+
+  return allFindings;
 }

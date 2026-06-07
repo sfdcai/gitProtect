@@ -5,7 +5,7 @@ import { mkdtempSync, rmSync } from 'fs';
 import { createServer } from 'http';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { scanDirectory } from './scanner.js';
+import { scanDirectory, scanGitHistory } from './scanner.js';
 
 // ─── Supabase client (service role — bypasses RLS for writes) ─────────────
 const supabase = createClient(
@@ -52,7 +52,7 @@ async function performScan(job, target) {
     console.log(`[job:${job.id}] Cloning into ${tmpDir}...`);
 
     const git = simpleGit();
-    const cloneOptions = ['--depth', '50']; // Shallow clone — last 50 commits
+    const cloneOptions = []; // Full clone for deep history scan
     if (process.env.GITHUB_PAT) {
       // Inject PAT into URL for higher rate limits
       const url = new URL(target.url);
@@ -70,15 +70,19 @@ async function performScan(job, target) {
     const repoGit = simpleGit(tmpDir);
     const commitInfo = await getLastCommitInfo(repoGit);
 
-    // Step 3: Scan directory
+    // Step 3: Scan directory and git history
     const rawFindings = scanDirectory(tmpDir);
+    const historyFindings = scanGitHistory(tmpDir);
+    const combinedFindings = [...rawFindings, ...historyFindings];
+    
     await updateJobStatus(job.id, 'scanning', 70);
-    console.log(`[job:${job.id}] Found ${rawFindings.length} potential secrets`);
+    console.log(`[job:${job.id}] Found ${combinedFindings.length} potential secrets`);
 
-    // Step 4: Deduplicate by (file_path + line_number + secret_type)
+    // Step 4: Deduplicate by (file_path + line_number/commit_hash + secret_type + masked_secret)
     const seen = new Set();
-    const deduped = rawFindings.filter((f) => {
-      const key = `${f.file_path}:${f.line_number}:${f.secret_type}`;
+    const deduped = combinedFindings.filter((f) => {
+      const loc = f.line_number === 0 ? f.commit_hash : f.line_number;
+      const key = `${f.file_path}:${loc}:${f.secret_type}:${f.masked_secret}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -89,8 +93,8 @@ async function performScan(job, target) {
       const dbFindings = deduped.map(({ raw_match, ...f }) => ({
         ...f,
         job_id: job.id,
-        commit_hash: commitInfo.commit_hash,
-        commit_author: commitInfo.commit_author,
+        commit_hash: f.commit_hash || commitInfo.commit_hash,
+        commit_author: f.commit_author || commitInfo.commit_author,
         is_false_positive: false,
       }));
 
