@@ -31,6 +31,14 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Allow users to create and delete their own scan jobs
+CREATE POLICY "Users can insert own jobs" ON scan_jobs FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM scan_targets WHERE scan_targets.id = target_id AND scan_targets.user_id = auth.uid())
+);
+CREATE POLICY "Users can delete own jobs" ON scan_jobs FOR DELETE USING (
+    EXISTS (SELECT 1 FROM scan_targets WHERE scan_targets.id = target_id AND scan_targets.user_id = auth.uid())
+);
 ```
 
 ---

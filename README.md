@@ -114,6 +114,12 @@ CREATE POLICY "Users can manage own targets" ON scan_targets FOR ALL USING (auth
 CREATE POLICY "Users can read own jobs" ON scan_jobs FOR SELECT USING (
     EXISTS (SELECT 1 FROM scan_targets WHERE scan_targets.id = scan_jobs.target_id AND scan_targets.user_id = auth.uid())
 );
+CREATE POLICY "Users can insert own jobs" ON scan_jobs FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM scan_targets WHERE scan_targets.id = target_id AND scan_targets.user_id = auth.uid())
+);
+CREATE POLICY "Users can delete own jobs" ON scan_jobs FOR DELETE USING (
+    EXISTS (SELECT 1 FROM scan_targets WHERE scan_targets.id = target_id AND scan_targets.user_id = auth.uid())
+);
 CREATE POLICY "Users can read own findings" ON secret_findings FOR SELECT USING (
     EXISTS (
         SELECT 1 FROM scan_jobs
