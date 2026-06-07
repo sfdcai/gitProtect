@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AlertTriangle, Search, Filter, Eye, EyeOff, CheckCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Search, Filter, Eye, EyeOff, CheckCircle, RefreshCw, ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { SecretFinding, Severity } from '@/lib/types';
 
@@ -26,7 +26,7 @@ export default function FindingsPage() {
         *,
         scan_jobs!inner(
           id,
-          scan_targets!inner(user_id, repo_name)
+          scan_targets!inner(user_id, repo_name, url)
         )
       `)
       .eq('scan_jobs.scan_targets.user_id', user.id)
@@ -161,9 +161,16 @@ export default function FindingsPage() {
                         <span className="text-xs" style={{ color: '#4a5280' }}>in {repoName}</span>
                       </div>
                       <div className="flex items-center gap-2 mb-2">
-                        <code className="text-xs px-2 py-0.5 rounded" style={{ background: '#0a0b14', color: '#8892b0', fontFamily: 'JetBrains Mono, monospace' }}>
+                        <a 
+                          href={(finding.scan_jobs as any)?.scan_targets?.url ? `${(finding.scan_jobs as any).scan_targets.url}/blob/${finding.commit_hash || 'main'}/${finding.file_path}#L${finding.line_number}` : '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs px-2 py-0.5 rounded flex items-center gap-1 hover:bg-opacity-80 transition-colors" 
+                          style={{ background: '#0a0b14', color: '#818cf8', fontFamily: 'JetBrains Mono, monospace' }}
+                        >
                           {finding.file_path}:{finding.line_number}
-                        </code>
+                          <ExternalLink size={10} />
+                        </a>
                       </div>
                       <div className="flex items-center gap-2">
                         <code

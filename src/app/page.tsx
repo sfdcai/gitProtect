@@ -212,7 +212,7 @@ export default function LandingPage() {
               </div>
               <div className="mb-6">
                 <div className="text-sm font-semibold mb-1" style={{ color: '#818cf8' }}>PRO</div>
-                <div className="text-5xl font-black text-white">$9<span className="text-lg font-normal text-gray-500">/mo</span></div>
+                <div className="text-3xl font-black text-white mt-4 mb-2">Coming Soon</div>
                 <p className="mt-2 text-sm" style={{ color: '#8892b0' }}>For teams that need private repo protection</p>
               </div>
               <ul className="space-y-3 mb-8">

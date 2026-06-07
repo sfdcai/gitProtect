@@ -17,7 +17,7 @@ export default async function DashboardPage() {
       .limit(5),
     supabase
       .from('secret_findings')
-      .select('*, scan_jobs!inner(id, scan_targets!inner(user_id, repo_name))')
+      .select('*, scan_jobs!inner(id, scan_targets!inner(user_id, repo_name, url))')
       .eq('scan_jobs.scan_targets.user_id', user!.id)
       .eq('is_false_positive', false)
       .in('severity', ['critical', 'high'])
@@ -118,19 +118,33 @@ export default async function DashboardPage() {
           </div>
           <div className="space-y-3">
             {criticalFindings && criticalFindings.length > 0 ? (
-              criticalFindings.map((finding: SecretFinding) => (
-                <div key={finding.id} className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid #1e2235' }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`badge badge-${finding.severity}`}>{finding.severity}</span>
-                        <span className="text-xs font-medium text-white">{finding.secret_type}</span>
+              criticalFindings.map((finding: SecretFinding) => {
+                const target = (finding.scan_jobs as any)?.scan_targets;
+                const fileUrl = target?.url ? `${target.url}/blob/${finding.commit_hash || 'main'}/${finding.file_path}#L${finding.line_number}` : '#';
+                
+                return (
+                  <div key={finding.id} className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid #1e2235' }}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`badge badge-${finding.severity}`}>{finding.severity}</span>
+                          <span className="text-xs font-medium text-white">{finding.secret_type}</span>
+                        </div>
+                        <a 
+                          href={fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-mono hover:text-white transition-colors flex items-center gap-1" 
+                          style={{ color: '#818cf8' }}
+                        >
+                          {finding.file_path}:{finding.line_number}
+                          <ExternalLink size={10} />
+                        </a>
                       </div>
-                      <p className="text-xs font-mono" style={{ color: '#4a5280' }}>{finding.file_path}:{finding.line_number}</p>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="text-center py-8">
                 <CheckCircle size={32} className="mx-auto mb-2" style={{ color: '#22c55e', opacity: 0.5 }} />

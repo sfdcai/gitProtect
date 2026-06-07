@@ -12,7 +12,10 @@ export default function RepositoriesPage() {
   const [scanning, setScanning] = useState<string | null>(null);
   const [newUrl, setNewUrl] = useState('');
   const [newName, setNewName] = useState('');
+  const [githubUsername, setGithubUsername] = useState('');
+  const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const supabase = createClient();
 
   const fetchTargets = async () => {
@@ -48,6 +51,53 @@ export default function RepositoriesPage() {
       fetchTargets();
     }
     setAdding(false);
+  };
+
+  const handleBulkImport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!githubUsername) return;
+    setImporting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const res = await fetch(`https://api.github.com/users/${githubUsername}/repos?type=public&per_page=100`);
+      if (!res.ok) throw new Error('Could not fetch repositories for this username');
+      
+      const repos = await res.json();
+      if (repos.length === 0) throw new Error('No public repositories found');
+
+      const existingUrls = new Set(targets.map((t) => t.url.toLowerCase()));
+      
+      const toInsert = repos
+        .filter((r: any) => !r.fork && !existingUrls.has(r.html_url.toLowerCase()))
+        .map((r: any) => ({
+          user_id: user.id,
+          repo_name: r.full_name,
+          url: r.html_url,
+          is_private: false,
+        }));
+
+      if (toInsert.length === 0) {
+        setSuccess('All public repositories are already being monitored!');
+        setImporting(false);
+        return;
+      }
+
+      const { error: dbError } = await supabase.from('scan_targets').insert(toInsert);
+      if (dbError) throw dbError;
+
+      setSuccess(`Successfully imported ${toInsert.length} repositories!`);
+      setGithubUsername('');
+      fetchTargets();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setImporting(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -108,6 +158,32 @@ export default function RepositoriesPage() {
             {adding ? 'Adding...' : 'Add Repository'}
           </button>
         </form>
+        
+        <div className="flex items-center gap-4 my-4">
+          <div className="flex-1 h-px" style={{ background: '#1e2235' }} />
+          <span className="text-xs" style={{ color: '#4a5280' }}>OR</span>
+          <div className="flex-1 h-px" style={{ background: '#1e2235' }} />
+        </div>
+
+        <form onSubmit={handleBulkImport} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={githubUsername}
+            onChange={(e) => setGithubUsername(e.target.value)}
+            required
+            placeholder="GitHub Username to import all public repos"
+            className="input-field flex-1"
+          />
+          <button type="submit" disabled={importing} className="btn-secondary whitespace-nowrap">
+            {importing ? 'Importing...' : 'Sync All Public Repos'}
+          </button>
+        </form>
+        
+        {success && (
+          <div className="mt-4 flex items-center gap-2 p-3 rounded-lg text-sm" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e' }}>
+            <AlertCircle size={14} /> {success}
+          </div>
+        )}
       </div>
 
       {/* Private repo upsell */}
