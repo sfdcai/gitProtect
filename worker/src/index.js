@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import simpleGit from 'simple-git';
 import { mkdtempSync, rmSync } from 'fs';
+import { createServer } from 'http';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { scanDirectory } from './scanner.js';
@@ -161,7 +162,6 @@ console.log(`   Supabase URL: ${process.env.SUPABASE_URL}`);
 
 // Minimal HTTP health-check server so Render doesn't kill the process
 // for not binding a port. Returns 200 OK on GET /health.
-import { createServer } from 'http';
 const PORT = process.env.PORT || 3001;
 createServer((req, res) => {
   if (req.url === '/health') {
