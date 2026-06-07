@@ -1,10 +1,15 @@
 {
   "name": "gitprotect-worker",
   "version": "1.0.0",
+  "license": "MIT",
   "description": "Background scanner worker for GitProtect — clones repositories and scans for leaked secrets",
   "main": "src/index.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
+    "build": "echo 'No build step required for Node.js worker'",
     "start": "node src/index.js",
     "dev": "node --watch src/index.js"
   },
