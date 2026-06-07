@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Shield, GitBranch, AlertTriangle, CheckCircle, Clock, Plus, ArrowRight } from 'lucide-react';
+import { Shield, GitBranch, AlertTriangle, CheckCircle, Clock, Plus, ArrowRight, ExternalLink } from 'lucide-react';
 import { ScanJob, SecretFinding, ScanTarget } from '@/lib/types';
 
 export default async function DashboardPage() {
