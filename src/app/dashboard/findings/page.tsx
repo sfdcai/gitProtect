@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AlertTriangle, Search, Filter, Eye, EyeOff, CheckCircle, RefreshCw, ExternalLink } from 'lucide-react';
+import { AlertTriangle, Search, Filter, Eye, EyeOff, CheckCircle, RefreshCw, ExternalLink, ShieldAlert } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { SecretFinding, Severity } from '@/lib/types';
 
@@ -83,6 +83,20 @@ export default function FindingsPage() {
           <RefreshCw size={16} />
         </button>
       </div>
+
+      {/* Remediation Guide Banner */}
+      {!loading && findings.length > 0 && (
+        <div className="p-5 rounded-xl border" style={{ background: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+          <h2 className="flex items-center gap-2 font-bold mb-3" style={{ color: '#ef4444' }}>
+            <ShieldAlert size={18} /> How to fix a leaked secret
+          </h2>
+          <div className="text-sm space-y-3" style={{ color: '#e8eaf6' }}>
+            <p><strong>1. Revoke the Secret (CRITICAL):</strong> Go to your provider (AWS, GitHub, Stripe, etc.) and immediately delete/regenerate the compromised key. Deleting the code will NOT stop hackers who have already scraped it.</p>
+            <p><strong>2. Remove from Codebase:</strong> Delete the key from your code and replace it with an environment variable (e.g., <code>process.env.SECRET_KEY</code>), then commit the change.</p>
+            <p><strong>3. Scrub the Git History:</strong> Since Git retains history, the revoked key is still visible in older commits. Use a tool like <a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#818cf8' }}>BFG Repo-Cleaner</a> to permanently scrub it from the history, then force-push.</p>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="glass-card p-4 flex flex-col sm:flex-row gap-3">
