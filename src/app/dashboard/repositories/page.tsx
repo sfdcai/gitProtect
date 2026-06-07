@@ -10,6 +10,7 @@ export default function RepositoriesPage() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [scanning, setScanning] = useState<string | null>(null);
+  const [scanningAll, setScanningAll] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [newName, setNewName] = useState('');
   const [githubUsername, setGithubUsername] = useState('');
@@ -116,6 +117,24 @@ export default function RepositoriesPage() {
     setScanning(null);
   };
 
+  const handleScanAll = async () => {
+    if (targets.length === 0) return;
+    setScanningAll(true);
+    setError(null);
+    
+    const toInsert = targets.map((target) => ({
+      target_id: target.id,
+      status: 'pending',
+      progress_percentage: 0,
+    }));
+
+    const { error: dbError } = await supabase.from('scan_jobs').insert(toInsert);
+    if (dbError) setError(dbError.message);
+    else setSuccess(`Successfully queued ${targets.length} repositories for scanning!`);
+    
+    setScanningAll(false);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -202,9 +221,22 @@ export default function RepositoriesPage() {
 
       {/* Repo list */}
       <div className="glass-card overflow-hidden">
-        <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: '#1e2235' }}>
-          <span className="font-semibold text-white">Monitored Repositories</span>
-          <span className="text-xs" style={{ color: '#4a5280' }}>{targets.length} repos</span>
+        <div className="px-6 py-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style={{ borderColor: '#1e2235' }}>
+          <div>
+            <span className="font-semibold text-white block sm:inline">Monitored Repositories</span>
+            <span className="text-xs sm:ml-2" style={{ color: '#4a5280' }}>{targets.length} repos</span>
+          </div>
+          {targets.length > 0 && (
+            <button
+              onClick={handleScanAll}
+              disabled={scanningAll}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border w-full sm:w-auto justify-center"
+              style={{ background: 'rgba(34,197,94,0.1)', borderColor: 'rgba(34,197,94,0.3)', color: '#22c55e' }}
+            >
+              <ScanLine size={13} />
+              {scanningAll ? 'Queuing All...' : 'Scan All Repos'}
+            </button>
+          )}
         </div>
         {loading ? (
           <div className="p-6 space-y-3">
