@@ -1,0 +1,16 @@
+{
+  "name": "gitprotect-worker",
+  "version": "1.0.0",
+  "description": "Background scanner worker for GitProtect — clones repositories and scans for leaked secrets",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.6",
+    "simple-git": "^3.27.0",
+    "dotenv": "^16.4.5"
+  }
+}
