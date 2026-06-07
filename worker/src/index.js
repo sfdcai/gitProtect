@@ -125,7 +125,7 @@ async function pollForJobs() {
       .from('scan_jobs')
       .select('*, scan_targets(*)')
       .eq('status', 'pending')
-      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
       .limit(1);
 
     if (error) {
@@ -158,6 +158,22 @@ async function pollForJobs() {
 console.log('🛡️  GitProtect Worker starting...');
 console.log(`   Polling every ${POLL_INTERVAL_MS / 1000}s for pending jobs`);
 console.log(`   Supabase URL: ${process.env.SUPABASE_URL}`);
+
+// Minimal HTTP health-check server so Render doesn't kill the process
+// for not binding a port. Returns 200 OK on GET /health.
+import { createServer } from 'http';
+const PORT = process.env.PORT || 3001;
+createServer((req, res) => {
+  if (req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', service: 'gitprotect-worker' }));
+  } else {
+    res.writeHead(404);
+    res.end();
+  }
+}).listen(PORT, () => {
+  console.log(`   Health endpoint: http://0.0.0.0:${PORT}/health`);
+});
 
 // Initial poll immediately, then on interval
 pollForJobs();
